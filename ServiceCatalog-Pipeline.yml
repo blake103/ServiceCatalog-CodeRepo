@@ -15,9 +15,6 @@ Parameters:
     Default: '/blueprints/resources/vpc_id'
     Type: 'AWS::SSM::Parameter::Value<String>'
     Description: VPC ID of your existing Virtual Private Cloud (VPC)
-  # SecurityGroupID:
-  #   Type: List<AWS::EC2::SecurityGroup::Id>
-  #   Default: '/blueprints/resources/securitygroups'
   Subnets:
     Default: '/blueprints/resources/subnets'
     Type: 'AWS::SSM::Parameter::Value<List<String>>'
