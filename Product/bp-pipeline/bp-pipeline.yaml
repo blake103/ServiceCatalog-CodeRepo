@@ -124,14 +124,14 @@ Resources:
                     - servicecatalog:AssociateProductWithPortfolio
                     - servicecatalog:CreateConstraint                    
                   Resource: 
-                    - !Sub arn:aws:catalog:${AWS::Region}:${AWS::AccountId}:*
-                    - !Sub arn:aws:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:catalog:${AWS::Region}:${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
                 - Effect: Deny # Deny Update to Immutable Products
                   Action: 
                     - servicecatalog:UpdateProvisioningArtifact
                   Resource: 
-                    - !Sub arn:aws:catalog:${AWS::Region}:${AWS::AccountId}:*
-                    - !Sub arn:aws:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:catalog:${AWS::Region}:${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
                   Condition:
                     StringNotEquals:
                       aws:ResourceTag/VersionStrategy: Mutable                  
@@ -145,7 +145,7 @@ Resources:
                     - cloudformation:List*
                     - cloudformation:UpdateStack
                     - cloudformation:ExecuteChangeSet
-                  Resource: !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:*'
+                  Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:*'
                 - Effect: Allow
                   Action:
                     - cloudformation:ValidateTemplate
@@ -158,12 +158,12 @@ Resources:
                     - codebuild:StopBuild
                     - codebuild:Retry*
                   Resource: 
-                    - !Sub arn:aws:iam::${AWS::AccountId}:*
-                    - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:*
+                    - !Sub arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:*
                 - Effect: Allow
                   Action:
                     - ec2:Describe*
-                  Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:*'
+                  Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*'
                 - Effect: Allow
                   Action:
                     - s3:PutObject
@@ -174,14 +174,14 @@ Resources:
                     - s3:GetObjectAcl
                     - s3:GetBucketVersioning
                   Resource:
-                    - !Sub "arn:aws:s3:::${ArtifactBucket}/*"
-                    - !Sub "arn:aws:s3:::${ArtifactBucket}"
+                    - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}/*"
+                    - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}"
                 - Effect: Allow
                   Action:
                     - "codeconnections:UseConnection"
                     - "codestar-connections:UseConnection"
                   Resource:
-                    - !Sub "arn:aws:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/*"
+                    - !Sub "arn:${AWS::Partition}:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/*"
 
   CodeBuildProjectPolicy:
     Type: AWS::IAM::Policy
@@ -193,8 +193,8 @@ Resources:
             - servicecatalog:UpdateProvisioningArtifact
           Effect: Allow
           Resource:
-            - !Sub arn:aws:catalog:${AWS::Region}:${AWS::AccountId}:*
-            - !Sub arn:aws:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
+            - !Sub arn:${AWS::Partition}:catalog:${AWS::Region}:${AWS::AccountId}:*
+            - !Sub arn:${AWS::Partition}:servicecatalog:${AWS::Region}:${AWS::AccountId}:*
         - Action:
           - logs:CreateLogStream
           - logs:PutLogEvents
@@ -208,7 +208,7 @@ Resources:
         - Effect: Allow
           Action:
             - ec2:DeleteNetworkInterface
-          Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:*'
+          Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*'
         - Effect: Allow
           Action:
             - "cloudformation:CreateChangeSet"
@@ -220,11 +220,11 @@ Resources:
             - "cloudformation:UpdateStack"
             - "cloudformation:ValidateTemplate"
             - "cloudformation:ExecuteChangeSet"
-          Resource: !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:*'
+          Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:*'
         - Effect: Allow
           Action:
           - ec2:CreateNetworkInterfacePermission
-          Resource: !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
+          Resource: !Sub "arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*"
           Condition:
             StringEquals:
               ec2:AuthorizedService: codebuild.amazonaws.com
@@ -234,14 +234,14 @@ Resources:
             - logs:PutLogEvents
             - logs:DescribeLogGroups
           Effect: Allow
-          Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*'
+          Resource: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*'
         - Action:
             - ssm:Get*
             - ssm:PutParameter
             - ssm:Describe*
           Effect: Allow
           Resource: 
-            - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/blueprints/*'
+            - !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/blueprints/*'
         - Effect: Allow
           Action:
             - s3:PutObject
@@ -252,8 +252,8 @@ Resources:
             - s3:GetObjectAcl
             - s3:GetBucketVersioning
           Resource:
-            - !Sub "arn:aws:s3:::${ArtifactBucket}/*"
-            - !Sub "arn:aws:s3:::${ArtifactBucket}"
+            - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}/*"
+            - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}"
         Version: '2012-10-17'
       PolicyName: !Sub "CodeBuild-${ProductName}-${AWS::StackName}"
       Roles:

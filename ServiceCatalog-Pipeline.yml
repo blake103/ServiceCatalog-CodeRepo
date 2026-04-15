@@ -99,27 +99,15 @@ Resources:
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                  - logs:CreateLogGroup
                 Resource:
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-              - Effect: Allow
-                Action:
-                  - ec2:CreateNetworkInterface
-                  - ec2:Describe*
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - ec2:DeleteNetworkInterface
-                Resource: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:*'
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*"
   rTransformFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}-replication-macro
       MemorySize: 128
       Timeout: 30
-      VpcConfig:
-        SecurityGroupIds: !Ref SecurityGroupIds
-        SubnetIds:
-          - !Select [ 0, !Ref Subnets ]
       Code:
         ZipFile: |
           import boto3
@@ -276,18 +264,8 @@ Resources:
             Value: !Ref EnvironmentType
           - Name: "ServiceCatalogAdminRole"
             Type: PLAINTEXT
-            Value: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
-      ServiceRole: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
+            Value: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
+      ServiceRole: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -338,18 +316,8 @@ Resources:
             Value: !Ref EnvironmentType
           - Name: "ServiceCatalogAdminRole"
             Type: PLAINTEXT
-            Value: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
-      ServiceRole: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
+            Value: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
+      ServiceRole: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -401,18 +369,8 @@ Resources:
             Value: !Ref ArtifactBucket
           - Name: ServiceCatalogAdminRole
             Type: PLAINTEXT
-            Value: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
-      ServiceRole: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
+            Value: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/ServiceCataloglogLaunchConstraintRole'
+      ServiceRole: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -465,12 +423,7 @@ Resources:
           - Name: "ARTIFACT_BUCKET"
             Type: PLAINTEXT
             Value: !Ref ArtifactBucket
-      ServiceRole: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':role/'
-                    - !Ref IamRoleName
+      ServiceRole: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${IamRoleName}'
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -654,25 +607,25 @@ Resources:
                   - 'codedeploy:GetDeploymentConfig'
                   - 'codedeploy:RegisterApplicationRevision'
                 Resource:
-                  - !Sub "arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:*"
+                  - !Sub "arn:${AWS::Partition}:codedeploy:${AWS::Region}:${AWS::AccountId}:*"
               - Effect: Allow
                 Action:
                   - 'codebuild:BatchGetBuilds'
                   - 'codebuild:StartBuild'
                 Resource:
-                  - !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:*"
+                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:*"
               - Effect: Allow
                 Action:
                   - 'lambda:InvokeFunction'
                   - 'lambda:ListFunctions'
                 Resource:
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:*"
+                  - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:*"
               - Effect: Allow
                 Action:
                   - "codeconnections:UseConnection"
                   - "codestar-connections:UseConnection"
                 Resource:
-                  - !Sub "arn:aws:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/*"
+                  - !Sub "arn:${AWS::Partition}:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/*"
               - Effect: Allow
                 Action:
                   - s3:PutObject
@@ -683,8 +636,8 @@ Resources:
                   - s3:GetObjectAcl
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub "arn:aws:s3:::${ArtifactBucket}/*"
-                  - !Sub "arn:aws:s3:::${ArtifactBucket}"
+                  - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}/*"
+                  - !Sub "arn:${AWS::Partition}:s3:::${ArtifactBucket}"
                   - !Join
                     - ''
                     - - !GetAtt 
@@ -710,6 +663,43 @@ Resources:
               #     - 'sns:*'
               #     - 'cloudformation:*'
               #   Resource: '*'
+
+  rCleanupExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: CleanupLambdaPermissions
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:DeleteParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/blueprints/*"
+              - Effect: Allow
+                Action:
+                  - servicecatalog:DisassociateProductFromPortfolio
+                  - servicecatalog:ListPrincipalsForPortfolio
+                  - servicecatalog:DisassociatePrincipalFromPortfolio
+                  - servicecatalog:DeletePortfolio
+                  - servicecatalog:DeleteProduct
+                Resource: "*"
 
   cCleanup:
       Type: AWS::Lambda::Function
@@ -744,7 +734,7 @@ Resources:
                   sc_portfolio_principal_ARN_list = [d['PrincipalARN'] for d in sc_portfolio_principals if 'PrincipalARN' in d]
                   for portfolio_principal_ARN in sc_portfolio_principal_ARN_list:
                       print("portfolio principal arn is {}".format(portfolio_principal_ARN))
-                      if "arn:aws:iam:::role" in portfolio_principal_ARN:
+                      if "arn:aws:iam:::role" in portfolio_principal_ARN or "arn:aws-us-gov:iam:::role" in portfolio_principal_ARN:
                           servicecatalog_client.disassociate_principal_from_portfolio(PortfolioId=ssm_portfolio_id,PrincipalType='IAM_PATTERN',PrincipalARN=portfolio_principal_ARN)
                       else:
                           servicecatalog_client.disassociate_principal_from_portfolio(PortfolioId=ssm_portfolio_id,PrincipalType='IAM',PrincipalARN=portfolio_principal_ARN)
@@ -776,12 +766,7 @@ Resources:
           Variables:
             ENVIRONMENTTYPE: !Ref EnvironmentType
             STACKNAME: !Ref 'AWS::StackName'
-        Role: !Join 
-                    - ''
-                    - - 'arn:aws:iam::'
-                      - !Ref 'AWS::AccountId'
-                      - ':role/'
-                      - !Ref IamRoleName
+        Role: !GetAtt rCleanupExecutionRole.Arn
   cleanupAdmin:
     Type: Custom::cleanupAdmin
     Properties:
